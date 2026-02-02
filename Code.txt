@@ -1,0 +1,430 @@
+# Import necessary libraries
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error, r2_score
+
+# Load your dataset from Excel file
+data = pd.read_excel(r'C:\Users\ok\Desktop\Dr Samuel AAUA\RHP Data ML-1.xlsx')
+
+# Print the column names to see what columns are available
+print("Columns in the dataset:")
+print(data.columns)
+
+# Clean data: Convert columns to numeric and handle errors
+data['K-40'] = pd.to_numeric(data['K-40'], errors='coerce')
+data['U-238'] = pd.to_numeric(data['U-238'], errors='coerce')
+data['Th-232'] = pd.to_numeric(data['Th-232'], errors='coerce')
+
+# Drop rows with missing values (NaN)
+data = data.dropna()
+
+# Assign features (X) and target (y)
+X = data[['U-238', 'Th-232']]  # Feature columns
+y = data['K-40']  # Target column (continuous)
+
+# Split the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Create the Random Forest Regressor
+rf_regressor = RandomForestRegressor(n_estimators=100, random_state=42)
+
+# Train the model
+rf_regressor.fit(X_train, y_train)
+
+# Make predictions
+y_pred = rf_regressor.predict(X_test)
+
+# Evaluate the model
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+
+# Output the results
+print(f'Mean Squared Error (MSE): {mse:.2f}')
+print(f'R-squared (R2): {r2:.2f}')
+
+# Plot the predictions vs actual values
+plt.figure(figsize=(6,4))
+plt.scatter(y_test, y_pred)
+plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'k--', lw=2)
+plt.xlabel('Actual')
+plt.ylabel('Predicted')
+plt.title('Actual vs Predicted')
+plt.show()
+
+# Plot feature importance
+feature_importances = rf_regressor.feature_importances_
+features = X.columns
+
+plt.figure(figsize=(8,6))
+sns.barplot(x=feature_importances, y=features)
+plt.title('Feature Importance')
+plt.xlabel('Importance Score')
+plt.ylabel('Features')
+plt.show()
+
+
+import numpy as np
+import pandas as pd
+import scipy.stats as stats
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Load your dataset from Excel file
+data = pd.read_excel(r'C:\Users\ok\Desktop\Dr Samuel AAUA\RHP Data ML-1.xlsx')
+
+# Print the first few rows of the dataset to inspect the data
+print(data.head())
+
+# Ensure columns are numeric
+data['K-40'] = pd.to_numeric(data['K-40'], errors='coerce')
+data['U-238'] = pd.to_numeric(data['U-238'], errors='coerce')
+data['Th-232'] = pd.to_numeric(data['Th-232'], errors='coerce')
+
+# Drop rows with missing values
+data = data.dropna()
+
+# Descriptive Statistics for all columns
+desc_stats = data.describe()
+print("Descriptive Statistics:")
+print(desc_stats)
+
+# Check for numeric columns for correlation
+numeric_columns = data.select_dtypes(include=[np.number]).columns.tolist()
+
+# Calculate correlation matrix
+corr_matrix = data[numeric_columns].corr()
+print("\nCorrelation Matrix:")
+print(corr_matrix)
+
+# Ensure the correlation matrix is not empty before plotting
+if not corr_matrix.empty:
+    # Visualize the correlation matrix using a heatmap
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', cbar=True)
+    plt.title('Correlation Matrix Heatmap')
+    plt.show()
+else:
+    print("Correlation matrix is empty. Check the data for numeric values.")
+
+# Perform Hypothesis Testing (e.g., T-Test between two columns)
+# Example: Testing if the mean of 'U-238' is significantly different from 'Th-232'
+t_stat, p_value = stats.ttest_ind(data['U-238'], data['Th-232'], nan_policy='omit')
+print(f"\nT-Test between 'U-238' and 'Th-232':\nT-Statistic = {t_stat}, P-Value = {p_value}")
+
+# Interpretation of the result
+if p_value < 0.05:
+    print("Reject the null hypothesis: There is a statistically significant difference between 'U-238' and 'Th-232'.")
+else:
+    print("Fail to reject the null hypothesis: No significant difference between 'U-238' and 'Th-232'.")
+
+# Boxplot to visualize distributions of 'U-238' and 'Th-232'
+plt.figure(figsize=(8, 6))
+sns.boxplot(data=data[['U-238', 'Th-232']])
+plt.title('Boxplot of U-238 and Th-232')
+plt.ylabel('Values')
+plt.show()
+
+# Check for normality using the Shapiro-Wilk test
+w_stat, p_value_shapiro = stats.shapiro(data['K-40'])
+print(f"\nShapiro-Wilk Test for normality on 'K-40':\nW-Statistic = {w_stat}, P-Value = {p_value_shapiro}")
+
+if p_value_shapiro < 0.05:
+    print("'K-40' does not follow a normal distribution (Reject H0 of normality).")
+else:
+    print("'K-40' follows a normal distribution (Fail to reject H0 of normality).")
+
+# Additional Statistical Measures
+# Variance, Standard Deviation, Median, Skewness, and Kurtosis
+var_k40 = data['K-40'].var()
+std_k40 = data['K-40'].std()
+median_k40 = data['K-40'].median()
+skew_k40 = data['K-40'].skew()
+kurt_k40 = data['K-40'].kurt()
+
+print(f"\nAdditional Statistics for 'K-40':")
+print(f"Variance: {var_k40}")
+print(f"Standard Deviation: {std_k40}")
+print(f"Median: {median_k40}")
+print(f"Skewness: {skew_k40}")
+print(f"Kurtosis: {kurt_k40}")
+
+# Import necessary libraries
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+
+# Load your dataset
+data = pd.read_excel(r'C:\Users\ok\Desktop\Dr Samuel AAUA\RHP Data ML-1.xlsx')
+
+# Ensure columns are numeric
+data['K-40'] = pd.to_numeric(data['K-40'], errors='coerce')
+data['U-238'] = pd.to_numeric(data['U-238'], errors='coerce')
+data['Th-232'] = pd.to_numeric(data['Th-232'], errors='coerce')
+
+# Drop rows with missing values
+data = data.dropna()
+
+# Show descriptive statistics
+descriptive_stats = data.describe()
+print("Descriptive Statistics:")
+print(descriptive_stats)
+
+# Define feature variables and target variable
+X = data[['U-238', 'Th-232']]  # Features
+y = data['K-40']  # Target variable
+
+# Split the dataset into training and testing sets (80% train, 20% test)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Linear Regression Model
+linear_model = LinearRegression()
+linear_model.fit(X_train, y_train)
+y_pred_linear = linear_model.predict(X_test)
+
+# Evaluate Linear Regression
+linear_mse = mean_squared_error(y_test, y_pred_linear)
+linear_rmse = np.sqrt(linear_mse)
+linear_mae = mean_absolute_error(y_test, y_pred_linear)
+linear_r2 = r2_score(y_test, y_pred_linear)
+linear_mape = np.mean(np.abs((y_test - y_pred_linear) / y_test)) * 100
+
+# Random Forest Regressor Model
+rf_model = RandomForestRegressor(n_estimators=100, random_state=42)
+rf_model.fit(X_train, y_train)
+y_pred_rf = rf_model.predict(X_test)
+
+# Evaluate Random Forest
+rf_mse = mean_squared_error(y_test, y_pred_rf)
+rf_rmse = np.sqrt(rf_mse)
+rf_mae = mean_absolute_error(y_test, y_pred_rf)
+rf_r2 = r2_score(y_test, y_pred_rf)
+rf_mape = np.mean(np.abs((y_test - y_pred_rf) / y_test)) * 100
+
+# Create a results dataframe for model metrics
+results = pd.DataFrame({
+    'Metric': ['Mean Squared Error (MSE)', 'Root Mean Squared Error (RMSE)', 
+               'Mean Absolute Error (MAE)', 'R^2 Score', 'Mean Absolute Percentage Error (MAPE)'],
+    'Linear Regression': [linear_mse, linear_rmse, linear_mae, linear_r2, linear_mape],
+    'Random Forest': [rf_mse, rf_rmse, rf_mae, rf_r2, rf_mape]
+})
+
+# Print the results
+print("\nModel Evaluation Results:")
+print(results)
+
+# Optional: Visualize predictions vs actual for both models
+plt.figure(figsize=(12, 6))
+
+# Linear Regression plot
+plt.subplot(1, 2, 1)
+plt.scatter(y_test, y_pred_linear, color='blue', alpha=0.5)
+plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], color='red', linewidth=2)
+plt.title('Linear Regression: Actual vs Predicted')
+plt.xlabel('Actual K-40')
+plt.ylabel('Predicted K-40')
+
+# Random Forest plot
+plt.subplot(1, 2, 2)
+plt.scatter(y_test, y_pred_rf, color='green', alpha=0.5)
+plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], color='red', linewidth=2)
+plt.title('Random Forest: Actual vs Predicted')
+plt.xlabel('Actual K-40')
+plt.ylabel('Predicted K-40')
+
+plt.tight_layout()
+plt.show()
+
+# Import necessary libraries
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+
+# Load your dataset
+data = pd.read_excel(r'C:\Users\ok\Desktop\Dr Samuel AAUA\RHP Data ML-1.xlsx')
+
+# Ensure columns are numeric
+data['K-40'] = pd.to_numeric(data['K-40'], errors='coerce')
+data['U-238'] = pd.to_numeric(data['U-238'], errors='coerce')
+data['Th-232'] = pd.to_numeric(data['Th-232'], errors='coerce')
+
+# Drop rows with missing values
+data = data.dropna()
+
+# Show descriptive statistics
+descriptive_stats = data.describe()
+print("Descriptive Statistics:")
+print(descriptive_stats)
+
+# Define feature variables and target variable
+X = data[['Th-232', 'U-238']]  # Features (Th-232 and U-238)
+y = data['K-40']  # Target variable (K-40)
+
+# Split the dataset into training and testing sets (80% train, 20% test)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Linear Regression Model
+linear_model = LinearRegression()
+linear_model.fit(X_train, y_train)
+y_pred_linear = linear_model.predict(X_test)
+
+# Evaluate Linear Regression
+linear_mse = mean_squared_error(y_test, y_pred_linear)
+linear_rmse = np.sqrt(linear_mse)
+linear_mae = mean_absolute_error(y_test, y_pred_linear)
+linear_r2 = r2_score(y_test, y_pred_linear)
+linear_mape = np.mean(np.abs((y_test - y_pred_linear) / y_test)) * 100
+
+# Random Forest Regressor Model
+rf_model = RandomForestRegressor(n_estimators=100, random_state=42)
+rf_model.fit(X_train, y_train)
+y_pred_rf = rf_model.predict(X_test)
+
+# Evaluate Random Forest
+rf_mse = mean_squared_error(y_test, y_pred_rf)
+rf_rmse = np.sqrt(rf_mse)
+rf_mae = mean_absolute_error(y_test, y_pred_rf)
+rf_r2 = r2_score(y_test, y_pred_rf)
+rf_mape = np.mean(np.abs((y_test - y_pred_rf) / y_test)) * 100
+
+# Create a results dataframe for model metrics
+results = pd.DataFrame({
+    'Metric': ['Mean Squared Error (MSE)', 'Root Mean Squared Error (RMSE)', 
+               'Mean Absolute Error (MAE)', 'R^2 Score', 'Mean Absolute Percentage Error (MAPE)'],
+    'Linear Regression': [linear_mse, linear_rmse, linear_mae, linear_r2, linear_mape],
+    'Random Forest': [rf_mse, rf_rmse, rf_mae, rf_r2, rf_mape]
+})
+
+# Print the results
+print("\nModel Evaluation Results:")
+print(results)
+
+# Plot histograms for K-40, U-238, and Th-232
+plt.figure(figsize=(15, 5))
+
+# Histogram for K-40
+plt.subplot(1, 3, 1)
+plt.hist(data['K-40'], bins=30, color='blue', alpha=0.7)
+plt.title('Histogram of K-40')
+plt.xlabel('K-40 Values')
+plt.ylabel('Frequency')
+
+# Histogram for U-238
+plt.subplot(1, 3, 2)
+plt.hist(data['U-238'], bins=30, color='green', alpha=0.7)
+plt.title('Histogram of U-238')
+plt.xlabel('U-238 Values')
+plt.ylabel('Frequency')
+
+# Histogram for Th-232
+plt.subplot(1, 3, 3)
+plt.hist(data['Th-232'], bins=30, color='orange', alpha=0.7)
+plt.title('Histogram of Th-232')
+plt.xlabel('Th-232 Values')
+plt.ylabel('Frequency')
+
+plt.tight_layout()
+plt.show()
+
+# Optional: Visualize predictions vs actual for both models
+plt.figure(figsize=(12, 6))
+
+# Linear Regression plot
+plt.subplot(1, 2, 1)
+plt.scatter(y_test, y_pred_linear, color='blue', alpha=0.5)
+plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], color='red', linewidth=2)
+plt.title('Linear Regression: Actual vs Predicted')
+plt.xlabel('Actual K-40')
+plt.ylabel('Predicted K-40')
+
+# Random Forest plot
+plt.subplot(1, 2, 2)
+plt.scatter(y_test, y_pred_rf, color='green', alpha=0.5)
+plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], color='red', linewidth=2)
+plt.title('Random Forest: Actual vs Predicted')
+plt.xlabel('Actual K-40')
+plt.ylabel('Predicted K-40')
+
+plt.tight_layout()
+plt.show()
+
+# Import necessary libraries
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error, r2_score
+
+# Load your dataset from Excel file
+data = pd.read_excel(r'C:\Users\ok\Desktop\Dr Samuel AAUA\RHP Data ML-1.xlsx')
+
+# Print the column names to see what columns are available
+print("Columns in the dataset:")
+print(data.columns)
+
+# Clean data: Convert columns to numeric and handle errors
+data['K-40'] = pd.to_numeric(data['K-40'], errors='coerce')
+data['U-238'] = pd.to_numeric(data['U-238'], errors='coerce')
+data['Th-232'] = pd.to_numeric(data['Th-232'], errors='coerce')
+
+# Drop rows with missing values (NaN)
+data = data.dropna()
+
+# Assign features (X) and target (y)
+X = data[['K-40', 'Th-232']]  # Feature columns
+y = data['U-238']  # Target column (continuous)
+
+# Split the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Create the Random Forest Regressor
+rf_regressor = RandomForestRegressor(n_estimators=100, random_state=42)
+
+# Train the model
+rf_regressor.fit(X_train, y_train)
+
+# Make predictions
+y_pred = rf_regressor.predict(X_test)
+
+# Evaluate the model
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+
+# Output the results
+print(f'Mean Squared Error (MSE): {mse:.2f}')
+print(f'R-squared (R2): {r2:.2f}')
+
+# Plot the predictions vs actual values
+plt.figure(figsize=(6,4))
+plt.scatter(y_test, y_pred)
+plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'k--', lw=2)
+plt.xlabel('Actual')
+plt.ylabel('Predicted')
+plt.title('Actual vs Predicted')
+plt.show()
+
+# Plot feature importance
+feature_importances = rf_regressor.feature_importances_
+features = X.columns
+
+plt.figure(figsize=(8,6))
+sns.barplot(x=feature_importances, y=features)
+plt.title('Feature Importance')
+plt.xlabel('Importance Score')
+plt.ylabel('Features')
+plt.show()
